@@ -6,7 +6,7 @@
 #define standardLED 8
 #define liqLevel A0
 #define resistor 560
-#define pump 2
+#define pump 3
 
 //0 = wait, 1 = dispensing shot, 2 = dispensing wine, 3 = dispensing standard
 int state;    
@@ -27,11 +27,10 @@ void setup() {
 void loop() {
   while(state == 0) {
      float waterVolt = analogRead(liqLevel);
-     float waterRes = (1023 / waterVolt) - 1;
-     waterRes = resistor / waterRes;
+     digitalWrite(pump, LOW);
      
-     Serial.print("Water resistance: ");
-     Serial.print(waterRes);
+     Serial.print("Water voltage: ");
+     Serial.print(waterVolt);
      Serial.print("\t");
      digitalWrite(shotLED, LOW);
      digitalWrite(wineLED, LOW);
@@ -71,30 +70,22 @@ void loop() {
 
 void pourShot() {
   float waterVolt = analogRead(liqLevel);
-  float waterRes = (1023 / waterVolt) - 1;
-  waterRes = resistor / waterRes;
+//  float waterRes = (1023 / waterVolt) - 1;
+//  waterRes = resistor / waterRes;
   float finalRes;
   int count = 0;
-    
-  if(waterRes > 1900) {
-    finalRes = waterRes-200;
-  } else {
-    finalRes = 1800;
-  }
   
-  
-  while(waterRes > finalRes && count < 3) {
+  while(waterVolt < 600 && count < 3) {
     waterVolt = analogRead(liqLevel);
-    waterRes = (1023 / waterVolt) - 1;
-    waterRes = resistor / waterRes;
+//    waterRes = (1023 / waterVolt) - 1;
+//    waterRes = resistor / waterRes;
     Serial.print("Water resistance: ");
-    Serial.print(waterRes);
+    Serial.print(waterVolt);
     Serial.println();
 
     digitalWrite(pump, HIGH);
-    if(waterRes < finalRes)
+    if(waterVolt > 600)
       count++;
-    delay(200);
   }
 
   digitalWrite(pump, LOW);
@@ -102,23 +93,19 @@ void pourShot() {
 
 void pourWine() {
   float waterVolt = analogRead(liqLevel);
-  float waterRes = (1023 / waterVolt) - 1;
-  waterRes = resistor / waterRes;
+//  float waterRes = (1023 / waterVolt) - 1;
+//  waterRes = resistor / waterRes;
   int count = 0;
   
   //50 is arbitrary amount for liqLevel sensor
-  while(waterRes > 1100 && count < 3) {
+  while(waterVolt < 650 && count < 3) {
     waterVolt = analogRead(liqLevel);
-    waterRes = (1023 / waterVolt) - 1;
-    waterRes = resistor / waterRes;
-    Serial.print("Water resistance: ");
-    Serial.print(waterRes);
+    Serial.print("Water voltage: ");
+    Serial.print(waterVolt);
     Serial.println();
     digitalWrite(pump, HIGH);
-    if(waterRes < 1100)
+    if(waterVolt > 650)
       count++;
-      
-    delay(200);
   }
   
   digitalWrite(pump, LOW);
@@ -126,22 +113,17 @@ void pourWine() {
 
 void pourStandard() {
   float waterVolt = analogRead(liqLevel);
-  float waterRes = (1023 / waterVolt) - 1;
-  waterRes = resistor / waterRes;
   int count = 0;
   
    //100 is arbitrary amount for liqLevel sensor
-   while(waterRes > 600 && count < 3) {
+   while(waterVolt < 700 && count < 3) {
     waterVolt = analogRead(liqLevel);
-    waterRes = (1023 / waterVolt) - 1;
-    waterRes = resistor / waterRes;
     Serial.print("Water voltage: ");
-    Serial.print(waterRes);
+    Serial.print(waterVolt);
     Serial.println();
     digitalWrite(pump, HIGH);
-    if(waterRes < 600)
+    if(waterVolt > 700)
       count++;
-    delay(200);
    }
 
    digitalWrite(pump, LOW);
